@@ -4,12 +4,12 @@ import random
 # size - (y, x)
 
 s = set()
-# [(0, 0), (0, 3), (1, 0), (1, 1), (1, 2), (1, 3), (1, 4), (2, 0), (2, 3), (3, 3)]
+
 
 def optional_elems(coords, binary_matrix, size):
     global s
     y, x = coords
-    delta = [(0, 1), (0, -1), (1, 1), (1, -1)]
+    delta = [(0, 1), (0, -1), (1, 0), (-1, 0)]
     for k in delta:
         dy, dx = k
         if y + dy not in range(size[0]):
@@ -39,17 +39,19 @@ def matching(binary_matrix, size):
                     for j in range(3):
                         s.add((i + j, k))
     s_array = sorted(list(s))
+    print(s_array)
     for i in range(size[0]):
         optional_elems(s_array[i], binary_matrix, size)
     return s
 
 
-arr = [[1, 0, 0, 1, 1],
-       [1, 1, 1, 1, 1],
-       [1, 1, 0, 1, 0],
-       [0, 0, 0, 1, 0],
-       [1, 0, 1, 0, 1]]
-print(sorted(list(matching(arr, (5, 5)))))
+arr = [[0, 0, 0, 0, 0, 0],
+       [0, 1, 1, 1, 1, 0],
+       [0, 1, 1, 0, 0, 0],
+       [0, 0, 1, 1, 0, 0],
+       [1, 0, 1, 0, 1, 0],
+       [1, 0, 1, 1, 0, 0]]
+print(sorted(list(matching(arr, (6, 6)))))
 
 
 # тут будет на выходе матрица из нулей и единичек
