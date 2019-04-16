@@ -3,10 +3,9 @@ import math
 import sys
 import os
 import random
+import logic
 
 all_sprites = pygame.sprite.Group()
-X0 = 200
-Y0 = 200
 CELL_SIZE = 50
 
 
@@ -71,8 +70,8 @@ class Object(pygame.sprite.Sprite):
 
 
 def get_obj_coords(x, y):
-    x = X0 + x * CELL_SIZE + 10
-    y = Y0 + y * CELL_SIZE + 10
+    x = X0 + x * CELL_SIZE
+    y = Y0 + y * CELL_SIZE
     return x, y
 
 
@@ -90,24 +89,26 @@ def update_map():
               [1, 1, 1, 1, 1, 1],
               [1, 1, 1, 1, 1, 2],
               ]
-
+    del all_sprites
     generate_map(matrix)
 
 
 pygame.init()
-size = width, height = 800, 600
+size = width, height = 800, 800
 screen = pygame.display.set_mode(size)
 fps = 30
 clock = pygame.time.Clock()
 running = True
 screen.fill(pygame.Color('White'))
 
-matrix = [[1, 1, 1, 1, 1, 1],
-          [1, 1, 1, 1, 1, 1],
-          [1, 3, 2, 1, 1, 1],
-          [1, 3, 1, 1, 1, 1],
-          [1, 3, 1, 1, 1, 3],
-          ]
+size = (8, 8)
+m = logic.Area(size, 4)
+m.matrix()
+matrix = m.arr
+
+# это криво написано как-то
+X0 = 200 - CELL_SIZE * (abs(size[1]) - 7)
+Y0 = 200 - CELL_SIZE * (abs(size[0]) - 7)
 
 board = Board(matrix)
 generate_map(matrix)
@@ -123,7 +124,7 @@ while running:
 
     # Making board
     all_sprites.update()
-    screen.blit(board.render(), (200, 200))
+    screen.blit(board.render(), (X0, Y0))
     all_sprites.draw(screen)
 
     # Drawing board

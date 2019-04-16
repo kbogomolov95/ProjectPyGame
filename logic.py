@@ -63,23 +63,24 @@ def to_binary_matrix(matrix, size, index):
 
 
 # N - кол-во уникальных элементов (картиночек)
-N = 5
+# N = 4
 
 
 class Area:
-    def __init__(self, size):
+    def __init__(self, size, N):
         self.size = size
         self.zero = 0
         self.arr = [[0] * size[1] for x in range(size[0])]
+        self.N = N
 
     def matrix(self):
-        conseq = [True for x in range(N)]
+        conseq = [True for x in range(self.N)]
         while True in conseq:
             for i in range(self.size[0]):
                 for j in range(self.size[1]):
-                    r = random.randint(1, N)  # границы включительно
+                    r = random.randint(1, self.N)  # границы включительно
                     self.arr[i][j] = r
-            for i in range(N):
+            for i in range(self.N):
                 conseq[i] = matching(to_binary_matrix(copy.deepcopy(self.arr), self.size, i + 1), self.size, check=True)
 
     def swap(self, coords1, coords2):
@@ -87,10 +88,9 @@ class Area:
         y2, x2 = coords2
         self.arr[y1][x1], self.arr[y2][x2] = self.arr[y2][x2], self.arr[y1][x1]
 
-
-a = Area((10, 10))
-a.matrix()
-pprint(a.arr)
-a.swap((0, 1), (0, 5))
-print()
-pprint(a.arr)
+# a = Area((10, 10))
+# a.matrix()
+# pprint(a.arr)
+# a.swap((0, 1), (0, 5))
+# print()
+# pprint(a.arr)
