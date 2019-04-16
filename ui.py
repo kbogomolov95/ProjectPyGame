@@ -59,10 +59,14 @@ class Object(pygame.sprite.Sprite):
         self.x0 = coords[0]
         self.y0 = coords[1]
 
-    def update(self, deletion):
-        self.rect.x = self.x0 + random.randrange(3) - 1
-        self.rect.y = self.y0 + random.randrange(3) - 1
-        if deletion
+    def update(self, event=None, deletion=False):
+        if not (event is None):
+            if self.rect.collidepoint(event.pos):
+                if deletion:
+                    self.kill()
+        else:
+            self.rect.x = self.x0 + random.randrange(3) - 1
+            self.rect.y = self.y0 + random.randrange(3) - 1
 
 def get_obj_coords(x, y):
     x = X0 + x * CELL_SIZE + 10
@@ -79,10 +83,6 @@ def generate_map(matrix):
 
 
 def update_map():
-    global all_sprites
-    del all_sprites
-    all_sprites = pygame.sprite.Group()
-
     matrix = [[1, 1, 1, 1, 1, 1],
               [1, 1, 1, 1, 1, 1],
               [1, 1, 2, 1, 1, 1],
@@ -118,7 +118,7 @@ while running:
         if event.type == pygame.MOUSEBUTTONDOWN:
             pass
         if event.type == pygame.MOUSEBUTTONUP:
-            update_map()
+            all_sprites.update(event, True)
 
     #Making board
     all_sprites.update()
