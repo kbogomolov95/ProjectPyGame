@@ -9,6 +9,7 @@ X0 = 200
 Y0 = 200
 CELL_SIZE = 50
 
+
 def load_image(name, colorkey=None):
     fullname = os.path.join('photos', name)
     try:
@@ -16,7 +17,7 @@ def load_image(name, colorkey=None):
     except pygame.error as message:
         print('Cannot load image:', name)
         raise SystemExit(message)
-    #image = image.convert_alpha()
+    # image = image.convert_alpha()
     if colorkey is not None:
         if colorkey is -1:
             colorkey = image.get_at((0, 0))
@@ -47,12 +48,12 @@ class Board():
 
 
 class Object(pygame.sprite.Sprite):
-    images = {'O_object': load_image("O_photo.png"),
-             'T_object': load_image("T_photo.png", -1)}
+    # images = {'O_object': load_image("O_photo.png"),
+    #           'T_object': load_image("T_photo.png", -1)}
 
-    def __init__(self, type, coords):
+    def __init__(self, name, coords):
         super().__init__(all_sprites)
-        self.image = Object.images[type]
+        self.image = load_image('{}.png'.format(name))
         self.rect = self.image.get_rect()
         self.rect.x = coords[0]
         self.rect.y = coords[1]
@@ -68,18 +69,18 @@ class Object(pygame.sprite.Sprite):
             self.rect.x = self.x0 + random.randrange(3) - 1
             self.rect.y = self.y0 + random.randrange(3) - 1
 
+
 def get_obj_coords(x, y):
     x = X0 + x * CELL_SIZE + 10
     y = Y0 + y * CELL_SIZE + 10
     return x, y
 
+
 def generate_map(matrix):
     for i in range(len(matrix)):
         for j in range(len(matrix[0])):
-            if matrix[i][j] == 1:
-                Object('O_object', get_obj_coords(j, i))
-            if matrix[i][j] == 2:
-                Object('T_object', get_obj_coords(j, i))
+            # print(matrix[i][j])
+            Object(str(matrix[i][j]), get_obj_coords(j, i))
 
 
 def update_map():
@@ -87,10 +88,11 @@ def update_map():
               [1, 1, 1, 1, 1, 1],
               [1, 1, 2, 1, 1, 1],
               [1, 1, 1, 1, 1, 1],
-              [1, 1, 1, 1, 1, 0],
+              [1, 1, 1, 1, 1, 2],
               ]
 
     generate_map(matrix)
+
 
 pygame.init()
 size = width, height = 800, 600
@@ -102,11 +104,10 @@ screen.fill(pygame.Color('White'))
 
 matrix = [[1, 1, 1, 1, 1, 1],
           [1, 1, 1, 1, 1, 1],
-          [1, 1, 2, 1, 1, 1],
-          [1, 1, 1, 1, 1, 1],
-          [1, 1, 1, 1, 1, 0],
+          [1, 3, 2, 1, 1, 1],
+          [1, 3, 1, 1, 1, 1],
+          [1, 3, 1, 1, 1, 3],
           ]
-
 
 board = Board(matrix)
 generate_map(matrix)
@@ -120,12 +121,12 @@ while running:
         if event.type == pygame.MOUSEBUTTONUP:
             all_sprites.update(event, True)
 
-    #Making board
+    # Making board
     all_sprites.update()
     screen.blit(board.render(), (200, 200))
     all_sprites.draw(screen)
 
-    #Drawing board
+    # Drawing board
     clock.tick(fps)
     pygame.display.flip()
 
