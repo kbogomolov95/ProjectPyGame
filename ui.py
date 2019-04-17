@@ -63,7 +63,6 @@ class Object(pygame.sprite.Sprite):
             if self.rect.collidepoint(pos):
                 if deletion:
                     self.kill()
-
                 if self.selected:
                     self.rect.x = self.x0 + random.randrange(3) - 1
                     self.rect.y = self.y0 + random.randrange(3) - 1
@@ -115,6 +114,7 @@ Y0 = 200 - CELL_SIZE * (abs(size[0]) - 8)
 board = Board(matrix)
 generate_map(matrix)
 # timer = 5
+
 destroy_animation = False
 waiting_animation = False
 pos1 = None
@@ -135,7 +135,6 @@ while running:
 
     all_sprites.update(pos1)
     all_sprites.update(pos2)
-
     # if timer:
     #    pass
     # else:
