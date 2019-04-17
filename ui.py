@@ -128,6 +128,14 @@ def get_i_j(pos):
     return (j, i)
 
 
+def neighbourhood(coord1, coord2):
+    a = [(0, 1), (0, -1), (1, 0), (-1, 0)]
+    for x in a:
+        if coord1[0] + x[0] == coord2[0] and coord1[1] + x[1] == coord2[1]:
+            return True
+    return False
+
+
 pygame.init()
 size = width, height = 800, 600
 screen = pygame.display.set_mode(size)
@@ -178,12 +186,14 @@ while running:
                     pos1 = event.pos
                     all_sprites.update(params, pos1)
                 else:
-                    params['selected'] = False
                     pos2 = event.pos
-                    all_sprites.update(params, pos2)
-                    mov1 = calc(pos1, pos2)
-                    mov2 = calc(pos2, pos1)
-                    timer = 11
+                    params['selected'] = False
+                    if neighbourhood(get_i_j(pos1), get_i_j(pos2)):
+                        all_sprites.update(params, pos2)
+                        mov1 = calc(pos1, pos2)
+                        mov2 = calc(pos2, pos1)
+                        timer = 11
+
 
     if timer:
         timer -= 1
