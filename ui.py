@@ -60,18 +60,23 @@ class Object(pygame.sprite.Sprite):
 
     def update(self, params, pos=None):
         if pos != None:
-            if self.rect.collidepoint(pos):
-                if params['deletion']:
-                    self.kill()
-                if self.selected:
-                    self.dergatsa()
+            if not self.rect.collidepoint(pos):
+                return
+            if params['deletion']:
+                self.kill()
+            if self.selected:
+                self.dergatsa()
 
-                if params['selected'] != None:
-                    self.selected = params['selected']
+            if params['selected'] != None:
+                self.selected = params['selected']
+            if params['move']:
+                self.rect.x += params['dxdy'][0]
+                self.rect.y += params['dxdy'][1]
 
     def dergatsa(self):
         self.rect.x = self.x0 + random.randrange(3) - 1
         self.rect.y = self.y0 + random.randrange(3) - 1
+
 
 def get_obj_coords(x, y):
     x = X0 + x * CELL_SIZE
@@ -123,7 +128,7 @@ destroy_animation = False
 waiting_animation = False
 pos1 = None
 pos2 = None
-params = {'selected': None, 'deletion': False, 'delta': False}
+params = {'selected': None, 'deletion': False, 'move': False, 'dxdy': (1, 1)}
 while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
