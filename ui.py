@@ -65,13 +65,14 @@ class Object(pygame.sprite.Sprite):
                     self.kill()
                 if self.selected:
                     self.dergatsa()
-
                 if params['selected'] != None:
                     self.selected = params['selected']
 
     def dergatsa(self):
         self.rect.x = self.x0 + random.randrange(3) - 1
         self.rect.y = self.y0 + random.randrange(3) - 1
+
+
 
 def get_obj_coords(x, y):
     x = X0 + x * CELL_SIZE
@@ -97,6 +98,10 @@ def update_map(matrix):
     del all_sprites
     generate_map(matrix)
 
+def calc(pos1, pos2):
+    dx = (pos1[0] - pos2[0])/(abs(pos1[0] - pos2[0]))
+    dy = (pos1[1] - pos2[1]) / (abs(pos1[1] - pos2[1]))
+    return dx * MOVE, dy * MOVE
 
 pygame.init()
 size = width, height = 800, 600
@@ -117,13 +122,13 @@ Y0 = 200 - CELL_SIZE * (abs(size[0]) - 7)
 
 board = Board(matrix)
 generate_map(matrix)
-# timer = 5
 
-destroy_animation = False
-waiting_animation = False
 pos1 = None
 pos2 = None
-params = {'selected': None, 'deletion': False, 'delta': False}
+params = {'selected': None, 'deletion': False, 'move': False}
+
+timer = 0
+
 while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -147,9 +152,21 @@ while running:
                 else:
                     pos2 = event.pos
                     all_sprites.update(params, pos2)
+                    mov1 = calc(pos1, pos2)
+                    mov2 = calc(pos2, pos1)
+                    timer = 10
 
-    all_sprites.update(params, pos1)
-    all_sprites.update(params, pos2)
+    if timer:
+        params['move'] = mov1
+        all_sprites.update(params, pos1)
+        params['move'] = mov2
+        all_sprites.update(params, pos2)
+        timer -= 1
+
+    else:
+
+        all_sprites.update(params, pos1)
+        all_sprites.update(params, pos2)
 
     # Making board
     screen.blit(board.render(), (X0, Y0))
