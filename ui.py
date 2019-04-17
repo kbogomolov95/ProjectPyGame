@@ -4,6 +4,7 @@ import sys
 import os
 import random
 import logic
+from pprint import pprint
 
 all_sprites = pygame.sprite.Group()
 
@@ -84,6 +85,7 @@ class Object(pygame.sprite.Sprite):
     def get_coords(self, coords):
         return int((coords[0] - X0) / 50), int((coords[1] - Y0) / 50)
 
+
 def get_obj_coords(x, y):
     x = X0 + x * CELL_SIZE
     y = Y0 + y * CELL_SIZE
@@ -97,15 +99,15 @@ def generate_map(matrix):
             Object(str(matrix[i][j]), get_obj_coords(j, i))
 
 
-def update_map(matrix):
-    matrix = [[1, 1, 1, 1, 1, 1],
-              [1, 1, 1, 1, 1, 1],
-              [1, 0, 2, 1, 1, 1],
-              [1, 1, 1, 1, 1, 1],
-              [1, 1, 1, 1, 1, 2],
-              ]
+def update_map(pos1, pos2):
+    global matrix
+    global all_sprites
+    pprint(matrix)
+    m.swap(pos1, pos2)
 
-    del all_sprites
+    matrix = m.arr
+    all_sprites = pygame.sprite.Group()
+    pprint(matrix)
     generate_map(matrix)
 
 
@@ -118,6 +120,12 @@ def calc(pos1, pos2):
     dx = -(X1 - X2)
     dy = -(Y1 - Y2)
     return dx * 5, dy * 5
+
+
+def get_i_j(pos):
+    i = int((pos[0] - X0) / 50)
+    j = int((pos[1] - Y0) / 50)
+    return (j, i)
 
 
 pygame.init()
@@ -140,7 +148,6 @@ Y0 = 200 - CELL_SIZE * (abs(size[0]) - 7)
 # Making board
 board = Board(matrix)
 
-
 generate_map(matrix)
 
 pos1, pos2 = None, None
@@ -160,7 +167,7 @@ while running:
                 pos1 = event.pos
                 params['selected'] = False
                 all_sprites.update(params, pos1)
-                #стираем что бы перестало подаваться
+                # стираем что бы перестало подаваться
                 pos1 = None
                 pos2 = None
             # иначе выбираем новую
@@ -183,12 +190,6 @@ while running:
     else:
         mov1, mov2 = False, False
 
-    if timer == 1:
-        timer -= 1
-        mov1, mov2 = False, False
-        pos1 = None
-        pos2 = None
-
     params['move'] = mov1
     all_sprites.update(params, pos1)
 
@@ -200,6 +201,11 @@ while running:
 
     clock.tick(fps)
     pygame.display.flip()
+    if timer == 1:
+        timer -= 1
+        mov1, mov2 = False, False
+        update_map(get_i_j(pos1), get_i_j(pos2))
+        pos1 = None
+        pos2 = None
 
 pygame.quit()
->>>>>>> d83ab277b01b9be3810f93149bf513b181e139a3
