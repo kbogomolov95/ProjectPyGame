@@ -64,12 +64,14 @@ class Object(pygame.sprite.Sprite):
                 if params['deletion']:
                     self.kill()
                 if self.selected:
-                    self.rect.x = self.x0 + random.randrange(3) - 1
-                    self.rect.y = self.y0 + random.randrange(3) - 1
+                    self.dergatsa()
 
                 if params['selected'] != None:
                     self.selected = params['selected']
 
+    def dergatsa(self):
+        self.rect.x = self.x0 + random.randrange(3) - 1
+        self.rect.y = self.y0 + random.randrange(3) - 1
 
 def get_obj_coords(x, y):
     x = X0 + x * CELL_SIZE
@@ -133,6 +135,8 @@ while running:
                 pos1 = event.pos
                 params['selected'] = False
                 all_sprites.update(params, pos1)
+                pos1 = None
+                pos2 = None
             # иначе выбираем новую
             else:
                 # если уже выбрали первую, то выбираем вторую фигурку
@@ -144,16 +148,8 @@ while running:
                     pos2 = event.pos
                     all_sprites.update(params, pos2)
 
-    # if time:
-    #     time--:
-    #     update()
     all_sprites.update(params, pos1)
     all_sprites.update(params, pos2)
-    # if timer:
-    #    pass
-    # else:
-    #    all_sprites.update(pos1, False)
-    #    all_sprites.update(pos2, False)
 
     # Making board
     screen.blit(board.render(), (X0, Y0))
