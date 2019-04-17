@@ -154,7 +154,7 @@ m = logic.Area(size, 4)
 m.matrix()
 matrix = m.arr
 
-#нормально подогнать
+# нормально подогнать
 X0 = 200 - CELL_SIZE * (abs(size[1]) - 7)
 Y0 = 200 - CELL_SIZE * (abs(size[0]) - 7)
 
@@ -233,6 +233,8 @@ while running:
     if timer2 == 1:
         update_map(waited=True)
         params['waiting'] = False
+
 pygame.quit()
+
 ####TO DO: сначала после свайпа элементов, если будет последовательность,
 # нужно заменить эту область на нули (а потом сделать, чтобы обрабатывались как пустоты
