@@ -106,9 +106,9 @@ def update_map(matrix):
 
 
 def calc(pos1, pos2):
-    dx = (pos1[0] - pos2[0]) / (abs(pos1[0] - pos2[0]))
-    dy = (pos1[1] - pos2[1]) / (abs(pos1[1] - pos2[1]))
-    return dx * 5, dy * 5
+    delta_x = int((pos1[0] - pos2[0]) / 50) * 50
+    delta_y = int((pos1[1] - pos2[1]) / 50) * 50
+    return delta_x, delta_y
 
 
 pygame.init()
@@ -162,18 +162,25 @@ while running:
                     all_sprites.update(params, pos2)
                     mov1 = calc(pos1, pos2)
                     mov2 = calc(pos2, pos1)
-                    timer = 10
+                    dt = clock.tick()
+                    vel = math.ceil(dt * 30 / 1000)
+                    dl = vel * dt
+                    pos1 = tuple(max(0, pos1[0] - dl, max(0, pos1[1] - dl)))
+                    pos2 = tuple(max(0, pos2[0] - dl, max(0, pos2[1] - dl)))
+                    # pos2[1] = max(0, pos2[1] - dl)
+                    if pos1[0] + pos1[1] == 0:
+                        params['move'] = False
 
     params['move'] = mov1
     all_sprites.update(params, pos1)
     params['move'] = mov2
     all_sprites.update(params, pos2)
 
-    if timer:
-        timer -= 1
-    else:
-        mov1 = False
-        mov2 = False
+    # if timer:
+    #     timer -= 1
+    # else:
+    #     mov1 = False
+    #     mov2 = False
 
     # Making board
     screen.blit(board.render(), (X0, Y0))
