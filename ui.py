@@ -108,8 +108,9 @@ m = logic.Area(size, 4)
 m.matrix()
 matrix = m.arr
 
-X0 = 200 - CELL_SIZE * (abs(size[1]) - 8)
-Y0 = 200 - CELL_SIZE * (abs(size[0]) - 8)
+# это криво написано как-то
+X0 = 200 - CELL_SIZE * (abs(size[1]) - 7)
+Y0 = 200 - CELL_SIZE * (abs(size[0]) - 7)
 
 board = Board(matrix)
 generate_map(matrix)
@@ -126,12 +127,19 @@ while running:
             running = False
 
         if event.type == pygame.MOUSEBUTTONUP:
-            if pos1 is None:
+            # нажатие на левую кнопку - отмена выбора
+            if event.button == 3:
                 pos1 = event.pos
-                all_sprites.update(pos1, True)
+                all_sprites.update(pos1, False)
+            # иначе выбираем новую
             else:
-                pos2 = event.pos
-                all_sprites.update(pos2, True)
+                # если уже выбрали первую, то выбираем вторую фигурку
+                if pos1 is None:
+                    pos1 = event.pos
+                    all_sprites.update(pos1, True)
+                else:
+                    pos2 = event.pos
+                    all_sprites.update(pos2, True)
 
     all_sprites.update(pos1)
     all_sprites.update(pos2)
