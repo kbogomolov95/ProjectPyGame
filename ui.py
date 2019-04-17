@@ -112,8 +112,8 @@ def update_map(matrix):
 def calc(pos1, pos2):
     X1 = int((pos1[0] - X0) / 50)
     X2 = int((pos2[0] - X0) / 50)
-    Y1 = int((pos1[1] - X0) / 50)
-    Y2 = int((pos2[1] - X0) / 50)
+    Y1 = int((pos1[1] - Y0) / 50)
+    Y2 = int((pos2[1] - Y0) / 50)
 
     dx = -(X1 - X2)
     dy = -(Y1 - Y2)
@@ -171,24 +171,29 @@ while running:
                     pos1 = event.pos
                     all_sprites.update(params, pos1)
                 else:
+                    params['selected'] = False
                     pos2 = event.pos
                     all_sprites.update(params, pos2)
                     mov1 = calc(pos1, pos2)
                     mov2 = calc(pos2, pos1)
-                    timer = 10
+                    timer = 11
 
     if timer:
         timer -= 1
     else:
         mov1, mov2 = False, False
 
+    if timer == 1:
+        timer -= 1
+        mov1, mov2 = False, False
+        pos1 = None
+        pos2 = None
+
     params['move'] = mov1
     all_sprites.update(params, pos1)
 
     params['move'] = mov2
     all_sprites.update(params, pos2)
-
-    print(mov1, mov2)
 
     screen.blit(board.render(), (X0, Y0))
     all_sprites.draw(screen)
