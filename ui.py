@@ -59,7 +59,7 @@ class Object(pygame.sprite.Sprite):
         self.selected = False
 
     def update(self, params, pos=None):
-        if not (pos is None):
+        if pos != None:
             if self.rect.collidepoint(pos):
                 if params['deletion']:
                     self.kill()
@@ -67,9 +67,8 @@ class Object(pygame.sprite.Sprite):
                     self.rect.x = self.x0 + random.randrange(3) - 1
                     self.rect.y = self.y0 + random.randrange(3) - 1
 
-                if not params['selected'] is None:
+                if params['selected'] != None:
                     self.selected = params['selected']
-        # (dx,dy)
 
 
 def get_obj_coords(x, y):
