@@ -48,6 +48,30 @@ class Board():
         return x * self.cell_size, y * self.cell_size
 
 
+class Score():
+    def __init__(self, x0, y0):
+        self.score = 0
+        self.font = pygame.font.Font(None, 50)
+        self.text = self.font.render("Your score: {}".format(self.score), 1, (0, 0, 0))
+        self.text_x = x0
+        self.text_y = y0
+        self.text_w = self.text.get_width()
+        self.text_h = self.text.get_height()
+
+    def draw(self, screen):
+        screen.blit(self.text, (self.text_x, self.text_y))
+        # pygame.draw.rect(screen, (0, 0, 0), (self.text_x - 10, self.text_y - 10,
+        #                                       self.text_w + 20, self.text_h + 20), 1)
+
+    def tick(self, delta):
+        self.score += delta
+        self.text = self.font.render("Your score: {}".format(self.score), 1, (0, 0, 0))
+
+    def set_score(self, score):
+        self.score = score
+        self.text = self.font.render("Your score: {}".format(self.score), 1, (0, 0, 0))
+
+
 class Object(pygame.sprite.Sprite):
     def __init__(self, name, coords):
         super().__init__(all_sprites)
@@ -90,7 +114,7 @@ class Object(pygame.sprite.Sprite):
 
 def get_obj_coords(x, y):
     x = X0 + x * CELL_SIZE
-    y = Y0 + y * CELL_SIZEhb
+    y = Y0 + y * CELL_SIZE
     return x, y
 
 
@@ -160,7 +184,7 @@ Y0 = 200 - CELL_SIZE * (abs(size[0]) - 7)
 
 # Making board
 board = Board(matrix)
-
+score_board = Score(220, 100)
 generate_map(matrix)
 
 pos1, pos2 = None, None
@@ -210,11 +234,15 @@ while running:
 
     params['move'] = mov1
     all_sprites.update(params, pos1)
+    screen.fill((255, 255, 255))
 
     params['move'] = mov2
     all_sprites.update(params, pos2)
 
     screen.blit(board.render(), (X0, Y0))
+    score_board.set_score(logic.score)
+    score_board.draw(screen)
+    
     all_sprites.draw(screen)
 
     clock.tick(fps)
