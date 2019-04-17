@@ -45,7 +45,7 @@ def matching(binary_matrix, size, check=False):
     if check:
         return bool(s_array)
     # print(s_array)
-    for i in range(size[0]):
+    for i in range(len(s_array)):
         optional_elems(s_array[i], binary_matrix, size)
     return s
 
@@ -64,6 +64,20 @@ def to_binary_matrix(matrix, size, index):
 
 # N - кол-во уникальных элементов (картиночек)
 # N = 4
+
+def zero_replacing(matrix, size, coords_of_conseq):
+    for i in range(size[0]):
+        for j in range(size[1]):
+            if tuple([i, j]) in coords_of_conseq:
+                matrix[i][j] = 0
+
+
+def new_consequences(matrix, size):
+    coords_of_conseq = set()
+    for y in range(N):
+        coords_of_conseq = coords_of_conseq.union(matching(to_binary_matrix(copy.deepcopy(matrix), size, y + 1), size))
+    # return coords_of_conseq
+    zero_replacing(matrix, size, coords_of_conseq)
 
 
 class Area:
@@ -87,10 +101,15 @@ class Area:
         y1, x1 = coords1
         y2, x2 = coords2
         self.arr[y1][x1], self.arr[y2][x2] = self.arr[y2][x2], self.arr[y1][x1]
+        new_consequences(self.arr, self.size)
 
-# a = Area((10, 10))
+
+N = 4
+# size = (8, 8)
+# a = Area(size, N)
 # a.matrix()
+# matrix = a.arr
 # pprint(a.arr)
-# a.swap((0, 1), (0, 5))
-# print()
+# # print()
+# a.swap(tuple(map(int, input().split())), tuple(map(int, input().split())))  ####
 # pprint(a.arr)

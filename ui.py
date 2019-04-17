@@ -98,18 +98,19 @@ def generate_map(matrix):
     for i in range(len(matrix)):
         for j in range(len(matrix[0])):
             # print(matrix[i][j])
-            Object(str(matrix[i][j]), get_obj_coords(j, i))
+            if matrix[i][j] != 0:
+                Object(str(matrix[i][j]), get_obj_coords(j, i))
 
 
 def update_map(pos1, pos2):
     global matrix
     global all_sprites
-    pprint(matrix)
+    # pprint(matrix)
     m.swap(pos1, pos2)
 
     matrix = m.arr
     all_sprites = pygame.sprite.Group()
-    pprint(matrix)
+    # pprint(matrix)
     generate_map(matrix)
 
 
@@ -225,3 +226,6 @@ while running:
         params['selected'] = True
 
 pygame.quit()
+
+####TO DO: сначала после свайпа элементов, если будет последовательность,
+# нужно заменить эту область на нули (а потом сделать, чтобы обрабатывались как пустоты
