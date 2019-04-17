@@ -58,17 +58,18 @@ class Object(pygame.sprite.Sprite):
         self.y0 = coords[1]
         self.selected = False
 
-    def update(self, pos=None, selected=None, deletion=False):
+    def update(self, params, pos=None):
         if not (pos is None):
             if self.rect.collidepoint(pos):
-                if deletion:
+                if params['deletion']:
                     self.kill()
                 if self.selected:
                     self.rect.x = self.x0 + random.randrange(3) - 1
                     self.rect.y = self.y0 + random.randrange(3) - 1
 
-                if not selected is None:
-                    self.selected = selected
+                if not params['selected'] is None:
+                    self.selected = params['selected']
+        # (dx,dy)
 
 
 def get_obj_coords(x, y):
@@ -91,6 +92,7 @@ def update_map(matrix):
               [1, 1, 1, 1, 1, 1],
               [1, 1, 1, 1, 1, 2],
               ]
+
     del all_sprites
     generate_map(matrix)
 
@@ -120,7 +122,7 @@ destroy_animation = False
 waiting_animation = False
 pos1 = None
 pos2 = None
-
+params = {'selected': None, 'deletion': False, 'delta': False}
 while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -130,19 +132,24 @@ while running:
             # нажатие на левую кнопку - отмена выбора
             if event.button == 3:
                 pos1 = event.pos
-                all_sprites.update(pos1, False)
+                params['selected'] = False
+                all_sprites.update(params, pos1)
             # иначе выбираем новую
             else:
                 # если уже выбрали первую, то выбираем вторую фигурку
+                params['selected'] = True
                 if pos1 is None:
                     pos1 = event.pos
-                    all_sprites.update(pos1, True)
+                    all_sprites.update(params, pos1)
                 else:
                     pos2 = event.pos
-                    all_sprites.update(pos2, True)
+                    all_sprites.update(params, pos2)
 
-    all_sprites.update(pos1)
-    all_sprites.update(pos2)
+    # if time:
+    #     time--:
+    #     update()
+    all_sprites.update(params, pos1)
+    all_sprites.update(params, pos2)
     # if timer:
     #    pass
     # else:
