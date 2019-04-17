@@ -8,6 +8,7 @@ import copy
 N = 4
 s = set()
 
+score = 0
 
 def optional_elems(coords, binary_matrix, size):
     global s
@@ -74,12 +75,12 @@ def zero_replacing(matrix, size, coords_of_conseq):
 
 
 def new_consequences(matrix, size):
+    global score
     coords_of_conseq = set()
     for y in range(N):
         coords_of_conseq = coords_of_conseq.union(matching(to_binary_matrix(copy.deepcopy(matrix), size, y + 1), size))
-    # return coords_of_conseq
+    score += len(coords_of_conseq)
     zero_replacing(matrix, size, coords_of_conseq)
-
 
 class Area:
     def __init__(self, size, N):
