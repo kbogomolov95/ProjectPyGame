@@ -198,33 +198,34 @@ while running:
         if event.type == pygame.QUIT:
             running = False
 
-        if event.type == pygame.MOUSEBUTTONUP:
-            # нажатие на левую кнопку - отмена выбора
-            if event.button == 3:
-                pos1 = event.pos
-                params['selected'] = False
-                all_sprites.update(params, pos1)
-                # стираем что бы перестало подаваться
-                pos1 = None
-                pos2 = None
-            # иначе выбираем новую
+        if event.type != pygame.MOUSEBUTTONUP:
+            continue
+        # нажатие на левую кнопку - отмена выбора
+        if event.button == 3:
+            pos1 = event.pos
+            params['selected'] = False
+            all_sprites.update(params, pos1)
+            # стираем что бы перестало подаваться
+            pos1 = None
+            pos2 = None
+            continue
+        # если уже выбрали первую, то выбираем вторую фигурку
+        params['selected'] = True
+        if pos1 is None:
+            pos1 = event.pos
+            all_sprites.update(params, pos1)
+        else:
+            pos2 = event.pos
+            params['selected'] = False
+            if neighbourhood(get_i_j(pos1), get_i_j(pos2)):
+                all_sprites.update(params, pos2)
+                mov1 = calc(pos1, pos2)
+                mov2 = calc(pos2, pos1)
+                timer = 16
             else:
-                # если уже выбрали первую, то выбираем вторую фигурку
+                pos2 = None
                 params['selected'] = True
-                if pos1 is None:
-                    pos1 = event.pos
-                    all_sprites.update(params, pos1)
-                else:
-                    pos2 = event.pos
-                    params['selected'] = False
-                    if neighbourhood(get_i_j(pos1), get_i_j(pos2)):
-                        all_sprites.update(params, pos2)
-                        mov1 = calc(pos1, pos2)
-                        mov2 = calc(pos2, pos1)
-                        timer = 16
-                    else:
-                        pos2 = None
-                        params['selected'] = True
+
     if timer2:
         timer2 -= 1
     if timer:
@@ -242,7 +243,7 @@ while running:
     screen.blit(board.render(), (X0, Y0))
     score_board.set_score(logic.score)
     score_board.draw(screen)
-    
+
     all_sprites.draw(screen)
 
     clock.tick(fps)
@@ -261,6 +262,9 @@ while running:
     if timer2 == 1:
         update_map(waited=True)
         params['waiting'] = False
+        update_map((0, 0), (0, 0))
+        timer2 = 50
+    # params['waiting'] = False
 
 pygame.quit()
 
