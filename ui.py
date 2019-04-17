@@ -57,16 +57,18 @@ class Object(pygame.sprite.Sprite):
         self.x0 = coords[0]
         self.y0 = coords[1]
         self.selected = False
+        self.board_coords = self.get_coords(coords)
 
     def update(self, params, pos=None):
         if pos != None:
-            if not self.rect.collidepoint(pos):
+            if self.board_coords != self.get_coords(pos):
                 return
             if params['deletion']:
                 self.kill()
 
             if params['selected'] != None:
                 self.selected = params['selected']
+
             if params['move']:
                 self.rect.x += params['move'][0]
                 self.rect.y += params['move'][1]
@@ -79,6 +81,8 @@ class Object(pygame.sprite.Sprite):
         self.rect.x = self.x0 + random.randrange(3) - 1
         self.rect.y = self.y0 + random.randrange(3) - 1
 
+    def get_coords(self, coords):
+        return int((coords[0] - X0) / 50), int((coords[1] - Y0) / 50)
 
 def get_obj_coords(x, y):
     x = X0 + x * CELL_SIZE
@@ -133,7 +137,10 @@ matrix = m.arr
 X0 = 200 - CELL_SIZE * (abs(size[1]) - 7)
 Y0 = 200 - CELL_SIZE * (abs(size[0]) - 7)
 
+# Making board
 board = Board(matrix)
+
+
 generate_map(matrix)
 
 pos1, pos2 = None, None
@@ -168,7 +175,7 @@ while running:
                     all_sprites.update(params, pos2)
                     mov1 = calc(pos1, pos2)
                     mov2 = calc(pos2, pos1)
-                    timer = 20
+                    timer = 10
 
     if timer:
         timer -= 1
@@ -177,14 +184,15 @@ while running:
 
     params['move'] = mov1
     all_sprites.update(params, pos1)
+
     params['move'] = mov2
     all_sprites.update(params, pos2)
 
-    # Making board
+    print(mov1, mov2)
+
     screen.blit(board.render(), (X0, Y0))
     all_sprites.draw(screen)
 
-    # Drawing board
     clock.tick(fps)
     pygame.display.flip()
 
