@@ -102,12 +102,14 @@ def generate_map(matrix):
                 Object(str(matrix[i][j]), get_obj_coords(j, i))
 
 
-def update_map(pos1, pos2):
+def update_map(pos1=(), pos2=(), waited=False):
     global matrix
     global all_sprites
     # pprint(matrix)
-    m.swap(pos1, pos2)
-
+    if not waited:
+        m.swap(pos1, pos2)
+    else:
+        m.modified_matrix()
     matrix = m.arr
     all_sprites = pygame.sprite.Group()
     # pprint(matrix)
@@ -163,10 +165,10 @@ generate_map(matrix)
 
 pos1, pos2 = None, None
 mov1, mov2 = False, False
-params = {'selected': None, 'deletion': False, 'move': False}
+params = {'selected': None, 'deletion': False, 'move': False, 'waiting': False}
 
 timer = 0
-
+timer2 = 0
 while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -199,6 +201,8 @@ while running:
                     else:
                         pos2 = None
                         params['selected'] = True
+    if timer2:
+        timer2 -= 1
     if timer:
         timer -= 1
     else:
@@ -218,13 +222,17 @@ while running:
     if timer == 1:
         timer -= 1
         update_map(get_i_j(pos1), get_i_j(pos2))
+        params['waiting'] = True
+        timer2 = 50
         pos1 = None
         pos2 = None
         params['selected'] = False
     elif timer == 6:
         mov1, mov2 = False, False
         params['selected'] = True
-
+    if timer2 == 1:
+        update_map(waited=True)
+        params['waiting'] = False
 pygame.quit()
 
 ####TO DO: сначала после свайпа элементов, если будет последовательность,

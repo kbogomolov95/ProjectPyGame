@@ -5,6 +5,7 @@ import copy
 # диагонали игнорируются
 # size - (y, x)
 
+N = 4
 s = set()
 
 
@@ -103,8 +104,12 @@ class Area:
         self.arr[y1][x1], self.arr[y2][x2] = self.arr[y2][x2], self.arr[y1][x1]
         new_consequences(self.arr, self.size)
 
+    def modified_matrix(self):
+        for i in range(self.size[0]):
+            for j in range(self.size[1]):
+                if self.arr[i][j] == 0:
+                    self.arr[i][j] = random.randint(1, N)
 
-N = 4
 # size = (8, 8)
 # a = Area(size, N)
 # a.matrix()
