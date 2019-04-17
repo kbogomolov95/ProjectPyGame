@@ -113,7 +113,7 @@ class Score():
 
 def get_obj_coords(x, y):
     x = X0 + x * CELL_SIZE
-    y = Y0 + y * CELL_SIZE
+    y = Y0 + y * CELL_SIZEhb
     return x, y
 
 
