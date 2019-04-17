@@ -73,6 +73,8 @@ class Object(pygame.sprite.Sprite):
             if params['move']:
                 self.rect.x += params['move'][0]
                 self.rect.y += params['move'][1]
+                self.x0 = self.rect.x
+                self.y0 = self.rect.y
                 self.selected = False
 
             if self.selected:
@@ -192,9 +194,10 @@ while running:
                         all_sprites.update(params, pos2)
                         mov1 = calc(pos1, pos2)
                         mov2 = calc(pos2, pos1)
-                        timer = 11
-
-
+                        timer = 16
+                    else:
+                        pos2 = None
+                        params['selected'] = True
     if timer:
         timer -= 1
     else:
@@ -213,9 +216,12 @@ while running:
     pygame.display.flip()
     if timer == 1:
         timer -= 1
-        mov1, mov2 = False, False
         update_map(get_i_j(pos1), get_i_j(pos2))
         pos1 = None
         pos2 = None
+        params['selected'] = False
+    elif timer == 6:
+        mov1, mov2 = False, False
+        params['selected'] = True
 
 pygame.quit()
