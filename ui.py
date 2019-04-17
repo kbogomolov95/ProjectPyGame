@@ -64,14 +64,16 @@ class Object(pygame.sprite.Sprite):
                 return
             if params['deletion']:
                 self.kill()
-            if self.selected:
-                self.dergatsa()
 
             if params['selected'] != None:
                 self.selected = params['selected']
             if params['move']:
-                self.rect.x += params['dxdy'][0]
-                self.rect.y += params['dxdy'][1]
+                self.rect.x += params['move'][0]
+                self.rect.y += params['move'][1]
+                self.selected = False
+
+            if self.selected:
+                self.dergatsa()
 
     def dergatsa(self):
         self.rect.x = self.x0 + random.randrange(3) - 1
@@ -103,6 +105,12 @@ def update_map(matrix):
     generate_map(matrix)
 
 
+def calc(pos1, pos2):
+    dx = (pos1[0] - pos2[0]) / (abs(pos1[0] - pos2[0]))
+    dy = (pos1[1] - pos2[1]) / (abs(pos1[1] - pos2[1]))
+    return dx * 5, dy * 5
+
+
 pygame.init()
 size = width, height = 800, 600
 screen = pygame.display.set_mode(size)
@@ -122,13 +130,13 @@ Y0 = 200 - CELL_SIZE * (abs(size[0]) - 7)
 
 board = Board(matrix)
 generate_map(matrix)
-# timer = 5
 
-destroy_animation = False
-waiting_animation = False
-pos1 = None
-pos2 = None
-params = {'selected': None, 'deletion': False, 'move': False, 'dxdy': (1, 1)}
+pos1, pos2 = None, None
+mov1, mov2 = False, False
+params = {'selected': None, 'deletion': False, 'move': False}
+
+timer = 0
+
 while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -152,9 +160,20 @@ while running:
                 else:
                     pos2 = event.pos
                     all_sprites.update(params, pos2)
+                    mov1 = calc(pos1, pos2)
+                    mov2 = calc(pos2, pos1)
+                    timer = 10
 
+    params['move'] = mov1
     all_sprites.update(params, pos1)
+    params['move'] = mov2
     all_sprites.update(params, pos2)
+
+    if timer:
+        timer -= 1
+    else:
+        mov1 = False
+        mov2 = False
 
     # Making board
     screen.blit(board.render(), (X0, Y0))
