@@ -164,8 +164,12 @@ def neighbourhood(coord1, coord2):
             return True
     return False
 
-
 pygame.init()
+
+pygame.mixer.music.load('derevnya-durakov-tp-kalambur.mp3')
+pygame.mixer.music.play(-1)
+pygame.mixer.music.rewind()
+
 size = width, height = 800, 600
 screen = pygame.display.set_mode(size)
 fps = 30
@@ -263,6 +267,3 @@ while running:
         params['waiting'] = False
 
 pygame.quit()
-
-####TO DO: сначала после свайпа элементов, если будет последовательность,
-# нужно заменить эту область на нули (а потом сделать, чтобы обрабатывались как пустоты
