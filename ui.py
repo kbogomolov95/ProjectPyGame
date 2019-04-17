@@ -87,6 +87,29 @@ class Object(pygame.sprite.Sprite):
     def get_coords(self, coords):
         return int((coords[0] - X0) / 50), int((coords[1] - Y0) / 50)
 
+class Score():
+    def __init__(self, x0, y0):
+        self.score = 0
+        self.font = pygame.font.Font(None, 50)
+        self.text = self.font.render("Your score: {}".format(self.score), 1, (0, 0, 0))
+        self.text_x = x0
+        self.text_y = y0
+        self.text_w = self.text.get_width()
+        self.text_h = self.text.get_height()
+
+    def draw(self, screen):
+        screen.blit(self.text, (self.text_x, self.text_y))
+        #pygame.draw.rect(screen, (0, 0, 0), (self.text_x - 10, self.text_y - 10,
+        #                                       self.text_w + 20, self.text_h + 20), 1)
+
+    def tick(self, delta):
+        self.score += delta
+        self.text = self.font.render("Your score: {}".format(self.score), 1, (0, 0, 0))
+
+    def set_score(self, score):
+        self.score = score
+        self.text = self.font.render("Your score: {}".format(self.score), 1, (0, 0, 0))
+
 
 def get_obj_coords(x, y):
     x = X0 + x * CELL_SIZE
@@ -138,7 +161,6 @@ def neighbourhood(coord1, coord2):
             return True
     return False
 
-
 pygame.init()
 size = width, height = 800, 600
 screen = pygame.display.set_mode(size)
@@ -158,7 +180,7 @@ Y0 = 200 - CELL_SIZE * (abs(size[0]) - 7)
 
 # Making board
 board = Board(matrix)
-
+score_board = Score(220, 100)
 generate_map(matrix)
 
 pos1, pos2 = None, None
@@ -209,23 +231,27 @@ while running:
 
     params['move'] = mov2
     all_sprites.update(params, pos2)
+    screen.fill((255, 255, 255))
 
     screen.blit(board.render(), (X0, Y0))
+
+    score_board.set_score(logic.score)
+    score_board.draw(screen)
+
     all_sprites.draw(screen)
 
     clock.tick(fps)
     pygame.display.flip()
+
     if timer == 1:
         timer -= 1
         update_map(get_i_j(pos1), get_i_j(pos2))
         pos1 = None
         pos2 = None
         params['selected'] = False
+
     elif timer == 6:
         mov1, mov2 = False, False
         params['selected'] = True
 
 pygame.quit()
-
-####TO DO: сначала после свайпа элементов, если будет последовательность,
-# нужно заменить эту область на нули (а потом сделать, чтобы обрабатывались как пустоты
