@@ -8,7 +8,6 @@ import logic
 all_sprites = pygame.sprite.Group()
 CELL_SIZE = 50
 
-
 def load_image(name, colorkey=None):
     fullname = os.path.join('photos', name)
     try:
@@ -47,9 +46,6 @@ class Board():
 
 
 class Object(pygame.sprite.Sprite):
-    # images = {'O_object': load_image("O_photo.png"),
-    #           'T_object': load_image("T_photo.png", -1)}
-
     def __init__(self, name, coords):
         super().__init__(all_sprites)
         self.image = load_image('{}.png'.format(name))
@@ -58,16 +54,20 @@ class Object(pygame.sprite.Sprite):
         self.rect.y = coords[1]
         self.x0 = coords[0]
         self.y0 = coords[1]
+        self.selected = False
 
-    def update(self, event=None, deletion=False):
-        if not (event is None):
-            if self.rect.collidepoint(event.pos):
+    def update(self, pos=None, selected=None, deletion=False):
+        if not (pos is None):
+            if self.rect.collidepoint(pos):
                 if deletion:
                     self.kill()
-        else:
-            self.rect.x = self.x0 + random.randrange(3) - 1
-            self.rect.y = self.y0 + random.randrange(3) - 1
 
+                if self.selected:
+                    self.rect.x = self.x0 + random.randrange(3) - 1
+                    self.rect.y = self.y0 + random.randrange(3) - 1
+
+                if not selected is None:
+                    self.selected = selected
 
 def get_obj_coords(x, y):
     x = X0 + x * CELL_SIZE
@@ -82,16 +82,15 @@ def generate_map(matrix):
             Object(str(matrix[i][j]), get_obj_coords(j, i))
 
 
-def update_map():
+def update_map(matrix):
     matrix = [[1, 1, 1, 1, 1, 1],
               [1, 1, 1, 1, 1, 1],
-              [1, 1, 2, 1, 1, 1],
+              [1, 0, 2, 1, 1, 1],
               [1, 1, 1, 1, 1, 1],
               [1, 1, 1, 1, 1, 2],
               ]
     del all_sprites
     generate_map(matrix)
-
 
 pygame.init()
 size = width, height = 800, 800
@@ -107,24 +106,37 @@ m.matrix()
 matrix = m.arr
 
 # это криво написано как-то
-X0 = 200 - CELL_SIZE * (abs(size[1]) - 7)
-Y0 = 200 - CELL_SIZE * (abs(size[0]) - 7)
+X0 = 200 - CELL_SIZE * (abs(size[1]) - 8)
+Y0 = 200 - CELL_SIZE * (abs(size[0]) - 8)
+
 
 board = Board(matrix)
 generate_map(matrix)
+timer = 5
+destroy_animation = False
+waiting_animation = False
+pos1 = None
+pos2 = None
+timer = 0
 
 while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
-        if event.type == pygame.MOUSEBUTTONDOWN:
-            pass
+
         if event.type == pygame.MOUSEBUTTONUP:
-            all_sprites.update(event, True)
+            if pos1 is None:
+                pos1 = event.pos
+                all_sprites.update(pos1, True)
+            else:
+                pos2 = event.pos
+                all_sprites.update(pos2, True)
+
+    all_sprites.update(pos1)
+    all_sprites.update(pos2)
 
     # Making board
-    all_sprites.update()
-    screen.blit(board.render(), (X0, Y0))
+    screen.blit(board.render(), (200, 200))
     all_sprites.draw(screen)
 
     # Drawing board
