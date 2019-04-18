@@ -8,7 +8,10 @@ from pprint import pprint
 
 all_sprites = pygame.sprite.Group()
 
-CELL_SIZE = 50
+VELOCITY = 5
+END_MOVING_DELAY = 5
+EMPTY_CELL_DELAY = 20
+DESTROY_DELAY = 20
 
 
 def load_image(name, colorkey=None):
@@ -112,12 +115,21 @@ class Object(pygame.sprite.Sprite):
         return int((coords[0] - X0) / 50), int((coords[1] - Y0) / 50)
 
 
+# ищет координаты левого верхнего угла по координатам доски
 def get_obj_coords(x, y):
-    x = X0 + x * CELL_SIZE
-    y = Y0 + y * CELL_SIZE
+    x = X0 + x * 50
+    y = Y0 + y * 50
     return x, y
 
 
+# ищет координаты доски по точке
+def get_i_j(pos):
+    i = int((pos[0] - X0) / 50)
+    j = int((pos[1] - Y0) / 50)
+    return (j, i)
+
+
+# генерируем мапу по матрице
 def generate_map(matrix):
     for i in range(len(matrix)):
         for j in range(len(matrix[0])):
@@ -126,6 +138,7 @@ def generate_map(matrix):
                 Object(str(matrix[i][j]), get_obj_coords(j, i))
 
 
+# обновляем мапу
 def update_map(pos1=(), pos2=(), waited=False, first=False):
     global matrix
     global all_sprites
@@ -140,7 +153,8 @@ def update_map(pos1=(), pos2=(), waited=False, first=False):
     generate_map(matrix)
 
 
-def calc(pos1, pos2):
+# считает скорость для обьекта с координатоми pos1
+def calc_mov(pos1, pos2):
     X1 = int((pos1[0] - X0) / 50)
     X2 = int((pos2[0] - X0) / 50)
     Y1 = int((pos1[1] - Y0) / 50)
@@ -148,15 +162,10 @@ def calc(pos1, pos2):
 
     dx = -(X1 - X2)
     dy = -(Y1 - Y2)
-    return dx * 5, dy * 5
+    return dx * VELOCITY, dy * VELOCITY
 
 
-def get_i_j(pos):
-    i = int((pos[0] - X0) / 50)
-    j = int((pos[1] - Y0) / 50)
-    return (j, i)
-
-
+# считает является ли 1 и 2 соседями
 def neighbourhood(coord1, coord2):
     a = [(0, 1), (0, -1), (1, 0), (-1, 0)]
     for x in a:
@@ -165,27 +174,32 @@ def neighbourhood(coord1, coord2):
     return False
 
 
+########ИНИЦИАЛИЗИРУЕМ##########
+
+# мутим музычку
 pygame.init()
 
 pygame.mixer.music.load('derevnya-durakov-tp-kalambur.mp3')
 pygame.mixer.music.play(111111)
 pygame.mixer.music.rewind()
 
+# здесь можно настроить размеры окна
 size_of_screen = width, height = 650, 650
 screen = pygame.display.set_mode(size_of_screen)
 fps = 30
 clock = pygame.time.Clock()
-running = True
-# screen.fill(pygame.Color('White'))
 
+# здесь можно настроить размеры доски
 size = (8, 8)
+
+#
 m = logic.Area(size, 4)
 m.matrix()
 matrix = m.arr
 
 # нормально подогнать
-X0 = 170 - CELL_SIZE * (abs(size[1]) - 7)
-Y0 = 185 - CELL_SIZE * (abs(size[0]) - 7)
+X0 = 170 - 50 * (abs(size[1]) - 7)
+Y0 = 185 - 50 * (abs(size[0]) - 7)
 
 # Making board
 board = Board(matrix)
@@ -194,6 +208,7 @@ score_board = Score(220, 100, 'Your score')
 luck_board = Score(220, 60, 'Lucky points')
 generate_map(matrix)
 
+# вводим переменные
 pos1, pos2 = None, None
 mov1, mov2 = False, False
 params = {'selected': None, 'deletion': False, 'move': False, 'waiting': False, 'first': False}
@@ -202,11 +217,13 @@ fon = pygame.transform.scale(load_image('bg.png'), size_of_screen)
 screen.blit(fon, (0, 0))
 
 moving_timer = 0
-delay = 15
+delay = 0
 in_waiting = False
 
 deleting_objects = []
 
+##########ИГРОВОЙ ЦИКЛ#############
+running = True
 while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -214,41 +231,53 @@ while running:
 
         if event.type != pygame.MOUSEBUTTONUP:
             continue
+
         # нажатие на левую кнопку - отмена выбора
         if event.button == 3:
             pos1 = event.pos
+            # прекращаем тряску
             params['selected'] = False
             all_sprites.update(params, pos1)
-            # стираем что бы перестало подаваться
-            pos1 = None
-            pos2 = None
+            # стираем что бы обнулить выбор
+            pos1, pos2 = None, None
             continue
-        # если уже выбрали первую, то выбираем вторую фигурку
-        params['selected'] = True
+
+        # если pos1 == нан то значит выбираем 1ую фигурку, иначе вторую
         if pos1 is None:
             pos1 = event.pos
+
+            # при нажатии фигурка должна трястись
+            params['selected'] = True
+
+            # апдейтим что бы начала трястись
             all_sprites.update(params, pos1)
         else:
             pos2 = event.pos
             params['first'] = True
             params['selected'] = False
+            # если кнопка по соседству то работаем дальше
             if neighbourhood(get_i_j(pos1), get_i_j(pos2)):
                 all_sprites.update(params, pos2)
-                mov1 = calc(pos1, pos2)
-                mov2 = calc(pos2, pos1)
-                moving_timer = 20
+
+                # считаем скорость для фигурок
+                mov1 = calc_mov(pos1, pos2)
+                mov2 = calc_mov(pos2, pos1)
+
+                # запускаем таймер
+                moving_timer = 50 / VELOCITY + END_MOVING_DELAY + 1
+                delay = 0
             else:
                 pos2 = None
                 params['selected'] = True
 
+    # за каждый кадр отбавляем 1 от таймеров
     if delay:
         delay -= 1
 
     if moving_timer:
         moving_timer -= 1
-    else:
-        mov1, mov2 = False, False
 
+    # если moving_timer == 1 то тогда останавливаем движение и обновляем карту что бы шары встали на место
     if moving_timer == 1:
         moving_timer -= 1
         if params['first']:
@@ -257,12 +286,12 @@ while running:
         else:
             update_map(get_i_j(pos1), get_i_j(pos2))
         params['waiting'] = True
-        delay = 15
-        pos1 = None
-        pos2 = None
         params['selected'] = False
+        pos1, pos2 = None, None
+        delay = EMPTY_CELL_DELAY
 
-    elif moving_timer == 10:
+    # если moving_timer == 6 то тогда движение останавливается и даем еще немного времени что бы потрястись
+    elif moving_timer == END_MOVING_DELAY:
         mov1, mov2 = False, False
         params['selected'] = True
 
@@ -270,12 +299,14 @@ while running:
         if in_waiting:
             update_map((0, 0), (0, 0))
             in_waiting = False
+            delay = EMPTY_CELL_DELAY
         else:
             update_map(waited=True)
             in_waiting = True
-        delay = 15
+            delay = DESTROY_DELAY
 
     #######ОТРИСОВКА#######
+    # делаем так что бы вся последовательность тряслась
     deleting_objects = logic.new_consequences(matrix, m.size, check=True)
     last_state = params['selected']
     params['move'] = False
@@ -284,23 +315,31 @@ while running:
         all_sprites.update(params, get_obj_coords(coords[1], coords[0]))
     params['selected'] = last_state
 
+    # обновляем положение первого
     params['move'] = mov1
     all_sprites.update(params, pos1)
+    # обновляем положение второго
     params['move'] = mov2
-    screen.fill((255, 255, 255))
-    screen.blit(fon, (0, 0))
     all_sprites.update(params, pos2)
-    screen.blit(board.render(), (X0, Y0))
+
+    # обновляем score
     score_board.set_score(logic.score)
     luck_board.set_score(logic.lucky_score)
     luck_board.draw(screen)
+
+    ########ВСТАВЛЯЕМ ФОН И ДОСКУ#######
+    screen.fill((255, 255, 255))
+    screen.blit(fon, (0, 0))
+    screen.blit(board.render(), (X0, Y0))
+
+    ########РИСУЕМ#######
     score_board.draw(screen)
     luck_board.draw(screen)
     all_sprites.draw(screen)
     clock.tick(fps)
     pygame.display.flip()
 
-pygame.quit()
 
-# c пустыми    update_map(waited=True)
-# с рандомными update_map((0, 0), (0, 0))
+
+
+pygame.quit()
