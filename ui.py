@@ -8,8 +8,11 @@ from pprint import pprint
 
 all_sprites = pygame.sprite.Group()
 
-CELL_SIZE = 50
 
+VELOCITY = 5
+END_MOVING_DELAY = 5
+EMPTY_CELL_DELAY = 20
+DESTROY_DELAY = 20
 
 def load_image(name, colorkey=None):
     fullname = os.path.join('photos', name)
@@ -113,8 +116,8 @@ class Object(pygame.sprite.Sprite):
 
 #ищет координаты левого верхнего угла по координатам доски
 def get_obj_coords(x, y):
-    x = X0 + x * CELL_SIZE
-    y = Y0 + y * CELL_SIZE
+    x = X0 + x * 50
+    y = Y0 + y * 50
     return x, y
 
 #ищет координаты доски по точке
@@ -154,7 +157,7 @@ def calc_mov(pos1, pos2):
 
     dx = -(X1 - X2)
     dy = -(Y1 - Y2)
-    return dx * 5, dy * 5
+    return dx * VELOCITY, dy * VELOCITY
 
 #считает является ли 1 и 2 соседями
 def neighbourhood(coord1, coord2):
@@ -189,8 +192,8 @@ m.matrix()
 matrix = m.arr
 
 # нормально подогнать
-X0 = 170 - CELL_SIZE * (abs(size[1]) - 7)
-Y0 = 185 - CELL_SIZE * (abs(size[0]) - 7)
+X0 = 170 - 50 * (abs(size[1]) - 7)
+Y0 = 185 - 50 * (abs(size[0]) - 7)
 
 # Making board
 board = Board(matrix)
@@ -236,8 +239,10 @@ while running:
         #если pos1 == нан то значит выбираем 1ую фигурку, иначе вторую
         if pos1 is None:
             pos1 = event.pos
+
             # при нажатии фигурка должна трястись
             params['selected'] = True
+
             #апдейтим что бы начала трястись
             all_sprites.update(params, pos1)
         else:
@@ -245,9 +250,13 @@ while running:
             #если кнопка по соседству то работаем дальше
             if neighbourhood(get_i_j(pos1), get_i_j(pos2)):
                 all_sprites.update(params, pos2)
+
+                #считаем скорость для фигурок
                 mov1 = calc_mov(pos1, pos2)
                 mov2 = calc_mov(pos2, pos1)
-                moving_timer = 17
+
+                #запускаем таймер
+                moving_timer = 50/VELOCITY + END_MOVING_DELAY + 1
                 delay = 0
             else:
                 pos2 = None
@@ -267,10 +276,10 @@ while running:
         params['waiting'] = True
         params['selected'] = False
         pos1, pos2 = None, None
-        delay = 10
+        delay = EMPTY_CELL_DELAY
 
     #если moving_timer == 6 то тогда движение останавливается и даем еще немного времени что бы потрястись
-    elif moving_timer == 6:
+    elif moving_timer == END_MOVING_DELAY:
         mov1, mov2 = False, False
         params['selected'] = True
 
@@ -278,11 +287,11 @@ while running:
         if in_waiting:
             update_map((0, 0), (0, 0))
             in_waiting = False
-            delay = 10
+            delay = EMPTY_CELL_DELAY
         else:
             update_map(waited=True)
             in_waiting = True
-            delay = 20
+            delay = DESTROY_DELAY
 
     #######ОБНОВЛЯЕМ#######
 
@@ -320,6 +329,3 @@ while running:
     pygame.display.flip()
 
 pygame.quit()
-
-#c пустыми    update_map(waited=True)
-#с рандомными update_map((0, 0), (0, 0))
