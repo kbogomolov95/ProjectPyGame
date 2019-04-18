@@ -199,18 +199,18 @@ def terminate():
 def starter_window():
     global screen
     FPS = 50
-    intro_text = ['Press any key on the keyboard to start the game...']
+    intro_text = ['We are glad that you visit our game', 'You need to get 500 points during timer', 'Goodluck!',
+                  'Press any key on the keyboard to start the game...']
     fon = pygame.transform.scale(load_image('bg.png'), size_of_screen)
     screen.blit(fon, (0, 0))
     font = pygame.font.Font(None, 30)
-    text_coord = 50
+    text_coord = 300
     for line in intro_text:
         string_rendered = font.render(line, 1, pygame.Color('black'))
         intro_rect = string_rendered.get_rect()
         text_coord += 10
         intro_rect.top = text_coord
         intro_rect.x = 100
-        intro_rect.y = 300
         text_coord += intro_rect.height
         screen.blit(string_rendered, intro_rect)
 
@@ -222,9 +222,6 @@ def starter_window():
                 return  # начинаем игру
         pygame.display.flip()
         clock.tick(FPS)
-
-
-starter_window()
 
 
 def main():
@@ -371,6 +368,40 @@ def main():
         pygame.display.flip()
 
 
-main()
+def closing_window(score):
+    global screen
+    FPS = 50
+    intro_text = ['Time is over', '', 'Congratulations! You have won the game', 'Unfortunately, you have lost the game',
+                  'Press any key to close the game']
+    fon = pygame.transform.scale(load_image('bg.png'), size_of_screen)
+    screen.blit(fon, (0, 0))
+    font = pygame.font.Font(None, 30)
+    text_coord = 300
+    for i in range(len(intro_text)):
+        if score <= 500 and i == 2:
+            continue
+        if score > 500 and i == 3:
+            continue
+        string_rendered = font.render(intro_text[i], 1, pygame.Color('black'))
+        intro_rect = string_rendered.get_rect()
+        text_coord += 10
+        intro_rect.top = text_coord
+        intro_rect.x = 100
+        text_coord += intro_rect.height
+        screen.blit(string_rendered, intro_rect)
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                terminate()
+            elif event.type == pygame.KEYDOWN or \
+                    event.type == pygame.MOUSEBUTTONDOWN:
+                return  # начинаем игру
+        pygame.display.flip()
+        clock.tick(FPS)
+
+
+closing_window(logic.score)
+# starter_window()
+# main()
 
 pygame.quit()
