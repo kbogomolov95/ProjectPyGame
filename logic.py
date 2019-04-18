@@ -83,7 +83,7 @@ def new_consequences(matrix, size, check=False, first=False):
         coords_of_conseq = coords_of_conseq.union(matching(to_binary_matrix(copy.deepcopy(matrix), size, y + 1), size))
     if not check:
         score += len(coords_of_conseq)
-        if first:
+        if not first:
             lucky_score += len(coords_of_conseq)
         zero_replacing(matrix, size, coords_of_conseq)
     else:
