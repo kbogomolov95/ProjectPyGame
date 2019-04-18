@@ -18,7 +18,7 @@ def load_image(name, colorkey=None):
     except pygame.error as message:
         print('Cannot load image:', name)
         raise SystemExit(message)
-    # image = image.convert_alpha()
+    #image = image.convert_alpha()
     if colorkey is not None:
         if colorkey is -1:
             colorkey = image.get_at((0, 0))
@@ -62,8 +62,6 @@ class Score():
 
     def draw(self, screen):
         screen.blit(self.text, (self.text_x, self.text_y))
-        # pygame.draw.rect(screen, (0, 0, 0), (self.text_x - 10, self.text_y - 10,
-        #                                       self.text_w + 20, self.text_h + 20), 1)
 
     def tick(self, delta):
         self.score += delta
@@ -170,7 +168,7 @@ def neighbourhood(coord1, coord2):
 pygame.init()
 
 pygame.mixer.music.load('derevnya-durakov-tp-kalambur.mp3')
-pygame.mixer.music.play(-1)
+pygame.mixer.music.play(111111)
 pygame.mixer.music.rewind()
 
 size_of_screen = width, height = 650, 650
@@ -203,8 +201,12 @@ params = {'selected': None, 'deletion': False, 'move': False, 'waiting': False}
 fon = pygame.transform.scale(load_image('bg.png'), size_of_screen)
 screen.blit(fon, (0, 0))
 
-timer = 0
-timer2 = 0
+moving_timer = 0
+delay = 15
+in_waiting = False
+
+deleting_objects = []
+
 while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -233,50 +235,65 @@ while running:
                 all_sprites.update(params, pos2)
                 mov1 = calc(pos1, pos2)
                 mov2 = calc(pos2, pos1)
-                timer = 16
+                moving_timer = 20
             else:
                 pos2 = None
                 params['selected'] = True
 
-    if timer2:
-        timer2 -= 1
-    if timer:
-        timer -= 1
+    if delay:
+        delay -= 1
+
+    if moving_timer:
+        moving_timer -= 1
     else:
         mov1, mov2 = False, False
+
+    if moving_timer == 1:
+        moving_timer -= 1
+        update_map(get_i_j(pos1), get_i_j(pos2))
+        params['waiting'] = True
+        delay = 15
+        pos1 = None
+        pos2 = None
+        params['selected'] = False
+
+    elif moving_timer == 10:
+        mov1, mov2 = False, False
+        params['selected'] = True
+
+    if delay == 1:
+        if in_waiting:
+            update_map((0, 0), (0, 0))
+            in_waiting = False
+        else:
+            update_map(waited=True)
+            in_waiting = True
+        delay = 15
+
+    #######ОТРИСОВКА#######
+    deleting_objects = logic.new_consequences(matrix, m.size, check = True)
+    last_state = params['selected']
+    params['move'] = False
+    params['selected'] = True
+    for coords in deleting_objects:
+        all_sprites.update(params, get_obj_coords(coords[1], coords[0]))
+    params['selected'] = last_state
 
     params['move'] = mov1
     all_sprites.update(params, pos1)
     screen.fill((255, 255, 255))
     screen.blit(fon, (0, 0))
-
     params['move'] = mov2
     all_sprites.update(params, pos2)
     screen.blit(board.render(), (X0, Y0))
     score_board.set_score(logic.score)
     score_board.draw(screen)
     luck_board.draw(screen)
-
     all_sprites.draw(screen)
-
     clock.tick(fps)
     pygame.display.flip()
-    if timer == 1:
-        timer -= 1
-        update_map(get_i_j(pos1), get_i_j(pos2))
-        params['waiting'] = True
-        timer2 = 50
-        pos1 = None
-        pos2 = None
-        params['selected'] = False
-    elif timer == 6:
-        mov1, mov2 = False, False
-        params['selected'] = True
-    if timer2 == 1:
-        update_map(waited=True)
-        params['waiting'] = False
-        update_map((0, 0), (0, 0))
-        timer2 = 50
-    # params['waiting'] = False
 
 pygame.quit()
+
+#c пустыми    update_map(waited=True)
+#с рандомными update_map((0, 0), (0, 0))
