@@ -8,10 +8,10 @@ from pprint import pprint
 
 all_sprites = pygame.sprite.Group()
 
-VELOCITY = 5
-END_MOVING_DELAY = 5
-EMPTY_CELL_DELAY = 20
-DESTROY_DELAY = 20
+VELOCITY = 10
+END_MOVING_DELAY = 10
+EMPTY_CELL_DELAY = 10
+DESTROY_DELAY = 10
 
 
 def load_image(name, colorkey=None):
@@ -68,11 +68,14 @@ class Score():
 
     def tick(self, delta):
         self.score += delta
-        self.text = self.font.render("{}: {}".format(self.t, self.score), 1, (0, 0, 0))
+        self.text = self.font.render("{}: {}".format(self.t, int(self.score)), 1, (0, 0, 0))
 
     def set_score(self, score):
         self.score = score
         self.text = self.font.render("{}: {}".format(self.t, self.score), 1, (0, 0, 0))
+
+    def get_score(self):
+        return self.score
 
 
 class Object(pygame.sprite.Sprite):
@@ -238,6 +241,8 @@ def main():
     # счетчики очков. 1 очко = 1 элемент последовательности
     score_board = Score(220, 100, 'Your score')
     luck_board = Score(220, 60, 'Lucky points')
+    time_board = Score(220, 10, 'Time')
+    time_board.set_score(120)
     generate_map(matrix)
 
     moving_timer = 0
@@ -353,7 +358,7 @@ def main():
         # обновляем score
         score_board.set_score(logic.score)
         luck_board.set_score(logic.lucky_score)
-        luck_board.draw(screen)
+        time_board.tick(-0.04)
 
         ########ВСТАВЛЯЕМ ФОН И ДОСКУ#######
         screen.fill((255, 255, 255))
@@ -363,10 +368,14 @@ def main():
         ########РИСУЕМ#######
         score_board.draw(screen)
         luck_board.draw(screen)
+        time_board.draw(screen)
         all_sprites.draw(screen)
         clock.tick(fps)
         pygame.display.flip()
 
+        ########ПРОВЕРЯЕМ ТАЙМЕР######
+        if time_board.get_score() < 0:
+            return
 
 def closing_window(score):
     global screen
@@ -400,8 +409,8 @@ def closing_window(score):
         clock.tick(FPS)
 
 
+starter_window()
+main()
 closing_window(logic.score)
-# starter_window()
-# main()
 
 pygame.quit()
