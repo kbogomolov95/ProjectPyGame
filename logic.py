@@ -9,6 +9,7 @@ N = 4
 s = set()
 
 score = 0
+lucky_score = 0
 
 
 def optional_elems(coords, binary_matrix, size):
@@ -75,13 +76,15 @@ def zero_replacing(matrix, size, coords_of_conseq):
                 matrix[i][j] = 0
 
 
-def new_consequences(matrix, size, check=False):
-    global score
+def new_consequences(matrix, size, check=False, first=False):
+    global score, lucky_score
     coords_of_conseq = set()
     for y in range(N):
         coords_of_conseq = coords_of_conseq.union(matching(to_binary_matrix(copy.deepcopy(matrix), size, y + 1), size))
     if not check:
         score += len(coords_of_conseq)
+        if first:
+            lucky_score += len(coords_of_conseq)
         zero_replacing(matrix, size, coords_of_conseq)
     else:
         return coords_of_conseq
@@ -104,11 +107,11 @@ class Area:
             for i in range(self.N):
                 conseq[i] = matching(to_binary_matrix(copy.deepcopy(self.arr), self.size, i + 1), self.size, check=True)
 
-    def swap(self, coords1, coords2):
+    def swap(self, coords1, coords2, first=False):
         y1, x1 = coords1
         y2, x2 = coords2
         self.arr[y1][x1], self.arr[y2][x2] = self.arr[y2][x2], self.arr[y1][x1]
-        new_consequences(self.arr, self.size)
+        new_consequences(self.arr, self.size, first=first)
 
     def modified_matrix(self):
         for i in range(self.size[0]):

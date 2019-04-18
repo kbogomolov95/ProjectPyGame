@@ -18,7 +18,7 @@ def load_image(name, colorkey=None):
     except pygame.error as message:
         print('Cannot load image:', name)
         raise SystemExit(message)
-    #image = image.convert_alpha()
+    # image = image.convert_alpha()
     if colorkey is not None:
         if colorkey is -1:
             colorkey = image.get_at((0, 0))
@@ -126,12 +126,12 @@ def generate_map(matrix):
                 Object(str(matrix[i][j]), get_obj_coords(j, i))
 
 
-def update_map(pos1=(), pos2=(), waited=False):
+def update_map(pos1=(), pos2=(), waited=False, first=False):
     global matrix
     global all_sprites
     # pprint(matrix)
     if not waited:
-        m.swap(pos1, pos2)
+        m.swap(pos1, pos2, first=first)
     else:
         m.modified_matrix()
     matrix = m.arr
@@ -196,7 +196,7 @@ generate_map(matrix)
 
 pos1, pos2 = None, None
 mov1, mov2 = False, False
-params = {'selected': None, 'deletion': False, 'move': False, 'waiting': False}
+params = {'selected': None, 'deletion': False, 'move': False, 'waiting': False, 'first': False}
 
 fon = pygame.transform.scale(load_image('bg.png'), size_of_screen)
 screen.blit(fon, (0, 0))
@@ -230,6 +230,7 @@ while running:
             all_sprites.update(params, pos1)
         else:
             pos2 = event.pos
+            params['first'] = True
             params['selected'] = False
             if neighbourhood(get_i_j(pos1), get_i_j(pos2)):
                 all_sprites.update(params, pos2)
@@ -250,7 +251,11 @@ while running:
 
     if moving_timer == 1:
         moving_timer -= 1
-        update_map(get_i_j(pos1), get_i_j(pos2))
+        if params['first']:
+            update_map(get_i_j(pos1), get_i_j(pos2), first=True)
+            params['first'] = False
+        else:
+            update_map(get_i_j(pos1), get_i_j(pos2))
         params['waiting'] = True
         delay = 15
         pos1 = None
@@ -271,7 +276,7 @@ while running:
         delay = 15
 
     #######ОТРИСОВКА#######
-    deleting_objects = logic.new_consequences(matrix, m.size, check = True)
+    deleting_objects = logic.new_consequences(matrix, m.size, check=True)
     last_state = params['selected']
     params['move'] = False
     params['selected'] = True
@@ -281,12 +286,14 @@ while running:
 
     params['move'] = mov1
     all_sprites.update(params, pos1)
+    params['move'] = mov2
     screen.fill((255, 255, 255))
     screen.blit(fon, (0, 0))
-    params['move'] = mov2
     all_sprites.update(params, pos2)
     screen.blit(board.render(), (X0, Y0))
     score_board.set_score(logic.score)
+    luck_board.set_score(logic.lucky_score)
+    luck_board.draw(screen)
     score_board.draw(screen)
     luck_board.draw(screen)
     all_sprites.draw(screen)
@@ -295,5 +302,5 @@ while running:
 
 pygame.quit()
 
-#c пустыми    update_map(waited=True)
-#с рандомными update_map((0, 0), (0, 0))
+# c пустыми    update_map(waited=True)
+# с рандомными update_map((0, 0), (0, 0))
