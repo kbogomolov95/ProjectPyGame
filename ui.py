@@ -49,10 +49,12 @@ class Board():
 
 
 class Score():
-    def __init__(self, x0, y0):
+    def __init__(self, x0, y0, text):
         self.score = 0
-        self.font = pygame.font.Font(None, 50)
-        self.text = self.font.render("Your score: {}".format(self.score), 1, (0, 0, 0))
+        self.t = text
+        self.font = pygame.font.Font(None, 40)
+        self.font.set_italic(True)
+        self.text = self.font.render("{}: {}".format(self.t, self.score), 1, (0, 0, 0))
         self.text_x = x0
         self.text_y = y0
         self.text_w = self.text.get_width()
@@ -65,11 +67,11 @@ class Score():
 
     def tick(self, delta):
         self.score += delta
-        self.text = self.font.render("Your score: {}".format(self.score), 1, (0, 0, 0))
+        self.text = self.font.render("{}: {}".format(self.t, self.score), 1, (0, 0, 0))
 
     def set_score(self, score):
         self.score = score
-        self.text = self.font.render("Your score: {}".format(self.score), 1, (0, 0, 0))
+        self.text = self.font.render("{}: {}".format(self.t, self.score), 1, (0, 0, 0))
 
 
 class Object(pygame.sprite.Sprite):
@@ -164,18 +166,19 @@ def neighbourhood(coord1, coord2):
             return True
     return False
 
+
 pygame.init()
 
 pygame.mixer.music.load('derevnya-durakov-tp-kalambur.mp3')
 pygame.mixer.music.play(-1)
 pygame.mixer.music.rewind()
 
-size = width, height = 800, 600
-screen = pygame.display.set_mode(size)
+size_of_screen = width, height = 650, 650
+screen = pygame.display.set_mode(size_of_screen)
 fps = 30
 clock = pygame.time.Clock()
 running = True
-screen.fill(pygame.Color('White'))
+# screen.fill(pygame.Color('White'))
 
 size = (8, 8)
 m = logic.Area(size, 4)
@@ -183,17 +186,22 @@ m.matrix()
 matrix = m.arr
 
 # нормально подогнать
-X0 = 200 - CELL_SIZE * (abs(size[1]) - 7)
-Y0 = 200 - CELL_SIZE * (abs(size[0]) - 7)
+X0 = 170 - CELL_SIZE * (abs(size[1]) - 7)
+Y0 = 185 - CELL_SIZE * (abs(size[0]) - 7)
 
 # Making board
 board = Board(matrix)
-score_board = Score(220, 100)
+
+score_board = Score(220, 100, 'Your score')
+luck_board = Score(220, 60, 'Lucky points')
 generate_map(matrix)
 
 pos1, pos2 = None, None
 mov1, mov2 = False, False
 params = {'selected': None, 'deletion': False, 'move': False, 'waiting': False}
+
+fon = pygame.transform.scale(load_image('bg.png'), size_of_screen)
+screen.blit(fon, (0, 0))
 
 timer = 0
 timer2 = 0
@@ -240,13 +248,14 @@ while running:
     params['move'] = mov1
     all_sprites.update(params, pos1)
     screen.fill((255, 255, 255))
+    screen.blit(fon, (0, 0))
 
     params['move'] = mov2
     all_sprites.update(params, pos2)
-
     screen.blit(board.render(), (X0, Y0))
     score_board.set_score(logic.score)
     score_board.draw(screen)
+    luck_board.draw(screen)
 
     all_sprites.draw(screen)
 
