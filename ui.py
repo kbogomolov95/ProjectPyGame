@@ -185,18 +185,51 @@ pygame.mixer.music.rewind()
 
 # здесь можно настроить размеры окна
 size_of_screen = width, height = 650, 650
+screen = pygame.display.set_mode(size_of_screen)
+clock = pygame.time.Clock()
 
 
 ##########ИГРОВОЙ ЦИКЛ#############
 
+def terminate():
+    pygame.quit()
+    sys.exit()
 
 
+def starter_window():
+    global screen
+    FPS = 50
+    intro_text = ['Press any key on the keyboard to start the game...']
+    fon = pygame.transform.scale(load_image('bg.png'), size_of_screen)
+    screen.blit(fon, (0, 0))
+    font = pygame.font.Font(None, 30)
+    text_coord = 50
+    for line in intro_text:
+        string_rendered = font.render(line, 1, pygame.Color('black'))
+        intro_rect = string_rendered.get_rect()
+        text_coord += 10
+        intro_rect.top = text_coord
+        intro_rect.x = 100
+        intro_rect.y = 300
+        text_coord += intro_rect.height
+        screen.blit(string_rendered, intro_rect)
 
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                terminate()
+            elif event.type == pygame.KEYDOWN:
+                return  # начинаем игру
+        pygame.display.flip()
+        clock.tick(FPS)
+
+
+starter_window()
 
 
 def main():
     # здесь можно настроить размеры доски
-    global size, X0, Y0, matrix, m
+    global size, X0, Y0, matrix, m, screen, clock
     size = (8, 8)
     X0 = 170 - 50 * (abs(size[1]) - 7)
     Y0 = 185 - 50 * (abs(size[0]) - 7)
@@ -216,19 +249,16 @@ def main():
     deleting_objects = []
 
     fps = 30
-    clock = pygame.time.Clock()
-    screen = pygame.display.set_mode(size_of_screen)
     fon = pygame.transform.scale(load_image('bg.png'), size_of_screen)
     screen.blit(fon, (0, 0))
     pos1, pos2 = None, None
     mov1, mov2 = False, False
     params = {'selected': None, 'deletion': False, 'move': False, 'waiting': False, 'first': False}
 
-    running = True
-    while running:
+    while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                running = False
+                terminate()
 
             if event.type != pygame.MOUSEBUTTONUP:
                 continue
