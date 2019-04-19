@@ -184,7 +184,7 @@ pygame.init()
 # мутим музычку
 pygame.mixer.music.load('derevnya-durakov-tp-kalambur.mp3')
 pygame.mixer.music.play(111111)
-pygame.mixer.music.rewind()
+#pygame.mixer.music.rewind()
 
 # здесь можно настроить размеры окна
 size_of_screen = width, height = 650, 650
@@ -223,6 +223,7 @@ def starter_window():
                 terminate()
             elif event.type == pygame.KEYDOWN:
                 return  # начинаем игру
+
         pygame.display.flip()
         clock.tick(FPS)
 
@@ -263,6 +264,9 @@ def main():
                 terminate()
 
             if event.type != pygame.MOUSEBUTTONUP:
+                continue
+
+            if moving_timer:
                 continue
 
             # нажатие на левую кнопку - отмена выбора
